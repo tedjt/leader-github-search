@@ -78,7 +78,6 @@ function validateName(name, query) {
     var lastLev = new Levenshtein(last, qLast);
     var totalLev = new Levenshtein(name, query);
 
-    console.log('name: %s, firstDistance: %d, lastDistance: %d', name, firstLev.distance, lastLev.distance);
     if ((firstLev.distance < 10 && lastLev.distance < 7) || totalLev.distance < 8) {
       return true;
     }
