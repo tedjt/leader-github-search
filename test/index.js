@@ -11,6 +11,11 @@ describe('leader-github-search', function () {
     assert(!github.wait(person, context));
   });
 
+  it('should wait if theres already a username', function () {
+    var context = {}, person = {name: 'Ted Tomlinson', github: {username: 'tedjt'}};
+    assert(!github.wait(person, context));
+  });
+
   it('should not wait if there is a company name', function () {
     var person = { name: 'Ted Tomlinson'};
     var context = {};

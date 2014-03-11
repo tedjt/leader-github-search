@@ -94,7 +94,7 @@ function validateName(name, query) {
  */
 
 function wait (person, context) {
-  return getSearchTerm(person, context);
+  return getSearchTerm(person, context) && !(person.github && person.github.username);
 }
 
 /**
