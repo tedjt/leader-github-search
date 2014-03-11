@@ -1,0 +1,24 @@
+{
+  "name": "leader-github-search",
+  "version": "1.0.0",
+  "repository": "git://github.com/tedjt/leader-github-search.git",
+  "license": "MIT",
+  "description": "A Github search plugin for leader to find Github profiles",
+  "keywords": [
+    "leader",
+    "Github",
+    "search",
+    "middleware"
+  ],
+  "dependencies": {
+    "debug": "~0.7.4",
+    "extend": "~1.2.1",
+    "defaults": "~1.0.0",
+    "htmlcrawler": "git://github.com/tedjt/htmlcrawler",
+    "levenshtein": "~1.0.4"
+  },
+  "devDependencies": {
+    "mocha": "~1.15.1",
+    "should": "~3.1.2"
+  }
+}
