@@ -43,6 +43,10 @@ function middleware (options) {
       }
       var username = firstResult.find('a').first().text();
       var email = decodeURIComponent(firstResult.find('a.email').attr('data-email'));
+      if (email) {
+        // strip out html characters
+        email = email.replace(/<.*?>/g, '');
+      }
       var nameArr = firstResult.text().split(/\s+/).filter(function(i) { return !!i; } );
       var meta = firstResult.find('.user-list-meta').text().split(/\s+/).filter(function(i) { return !!i; })[0];
       var name = nameArr.slice(1, nameArr.indexOf(meta)).join(' ');
