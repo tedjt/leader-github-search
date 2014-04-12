@@ -2,6 +2,7 @@ var Crawler = require('htmlcrawler');
 var debug = require('debug')('leader:githubsearcher');
 var extend = require('extend');
 var defaults = require('defaults');
+var GitHubApi = require('github');
 var Levenshtein = require('levenshtein');
 
 var SEARCH_URL = 'https://github.com/search?type=Users&ref=searchresults&q=';
@@ -30,44 +31,95 @@ module.exports.test = {
 function middleware (options) {
   options = options || {};
   var crawler = new Crawler();
-  return function angelList (person, context, next) {
+  var ghApi = null;
+  if (options.api) {
+    ghApi = new GitHubApi({
+      version: '3.0.0',
+      // optional
+      timeout: 5000
+    });
+    ghApi.authenticate({
+      type: 'oauth',
+      key: options.api.clientId,
+      secret: options.api.secret
+    });
+  }
+  return function githubSearch (person, context, next) {
     var query = getSearchTerm(person, context);
     if (!query) return next();
     debug('query github with query %s ..', query);
-    var url = SEARCH_URL + encodeURIComponent(query);
-    crawler.load(url, function(err, $) {
-      if (err) return next(err);
-      var firstResult = $('.user-list-info').first();
+    searchCrawl(crawler, query, person, context, next);
+    /*
+    if (ghApi) {
+      searchApi(ghApi, query, person, context, next);
+    } else {
+      searchCrawl(crawler, query, person, context, next);
+    }
+    */
+  };
+}
+
+function searchCrawl(crawler, query, person, context, next) {
+  var url = SEARCH_URL + encodeURIComponent(query);
+  crawler.load(url, function(err, $) {
+    if (err) return next(err);
+    var firstResult = $('.user-list-info').first();
+    if (!firstResult) {
+      return next();
+    }
+    var username = firstResult.find('a').first().text();
+    var email = decodeURIComponent(firstResult.find('a.email').attr('data-email'));
+    if (email) {
+      // strip out html characters
+      email = email.replace(/<.*?>/g, '');
+    }
+    var nameArr = firstResult.text().split(/\s+/).filter(function(i) { return !!i; } );
+    var meta = firstResult.find('.user-list-meta').text().split(/\s+/).filter(function(i) { return !!i; })[0];
+    var name = nameArr.slice(1, nameArr.indexOf(meta)).join(' ');
+    if (!validateName(name, query)) {
+      debug('not saving github search since name: %s is too different from query %s', name, query);
+      return next();
+    }
+
+    var github = {
+      username: username,
+      url: 'https://github.com/' + username
+    };
+    if (email && email !== 'undefined') {
+      github.email = email;
+    }
+    extend(true, context, { github: { search: github }});
+    extend(true, person, { github: github });
+    debug('Updated Github info from search with query %s ..', query);
+    return next();
+  });
+}
+
+function searchApi(api, query, person, context, next) {
+  api.search.users(
+    {q: encodeURIComponent(query)},
+    function(err, res) {
+      console.log(res);
+      if (err) return callback(err);
+      var firstResult = res.items[0];
       if (!firstResult) {
         return next();
       }
-      var username = firstResult.find('a').first().text();
-      var email = decodeURIComponent(firstResult.find('a.email').attr('data-email'));
-      if (email) {
-        // strip out html characters
-        email = email.replace(/<.*?>/g, '');
-      }
-      var nameArr = firstResult.text().split(/\s+/).filter(function(i) { return !!i; } );
-      var meta = firstResult.find('.user-list-meta').text().split(/\s+/).filter(function(i) { return !!i; })[0];
-      var name = nameArr.slice(1, nameArr.indexOf(meta)).join(' ');
-      if (!validateName(name, query)) {
-        debug('not saving github search since name: %s is too different from query %s', name, query);
+      if (firstResult.score < 7) {
+        debug('not saving github search since name: %s had too low a score %f', query, firstResult.score);
         return next();
       }
-
       var github = {
-        username: username,
-        url: 'https://github.com/' + username
+        username: firstResult.login,
+        url: 'https://github.com/' + firstResult.login,
+        id: firstResult.id
       };
-      if (email && email !== 'undefined') {
-        github.email = email;
-      }
       extend(true, context, { github: { search: github }});
       extend(true, person, { github: github });
       debug('Updated Github info from search with query %s ..', query);
       return next();
-    });
-  };
+    }
+  );
 }
 
 function validateName(name, query) {

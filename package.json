@@ -12,8 +12,9 @@
   ],
   "dependencies": {
     "debug": "~0.7.4",
-    "extend": "~1.2.1",
     "defaults": "~1.0.0",
+    "extend": "~1.2.1",
+    "github": "^0.1.16",
     "htmlcrawler": "git://github.com/tedjt/htmlcrawler",
     "levenshtein": "~1.0.4"
   },

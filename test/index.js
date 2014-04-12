@@ -4,6 +4,7 @@ var should = require('should');
 var plugin = require('..');
 
 describe('leader-github-search', function () {
+  //var github = plugin({api: {clientId: '002cdcdaa15815d40281', secret: '8cfe05f27e920fa1103fbc78f227ae31ade8f97a'}});
   var github = plugin();
 
   it('should wait if theres no full name', function () {
@@ -43,11 +44,12 @@ describe('leader-github-search', function () {
     });
   });
 
-  it('should be able to resolve a valid profile for Max Kolysh', function (done) {
+  it.only('should be able to resolve a valid profile for Max Kolysh', function (done) {
     var person = { name: 'Max Kolysh'};
     var context = {};
     github.fn(person, context, function (err) {
       if (err) return done(err);
+      console.log(person);
       assert(person);
       person.github.url.should.equal('https://github.com/maxko87');
       person.github.username.should.equal('maxko87');
