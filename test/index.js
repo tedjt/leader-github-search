@@ -44,7 +44,7 @@ describe('leader-github-search', function () {
     });
   });
 
-  it.only('should be able to resolve a valid profile for Max Kolysh', function (done) {
+  it('should be able to resolve a valid profile for Max Kolysh', function (done) {
     var person = { name: 'Max Kolysh'};
     var context = {};
     github.fn(person, context, function (err) {
@@ -54,6 +54,19 @@ describe('leader-github-search', function () {
       person.github.url.should.equal('https://github.com/maxko87');
       person.github.username.should.equal('maxko87');
       person.github.email.should.equal('maxko87@gmail.com');
+      done();
+    });
+  });
+
+  it.only('should be able to resolve a valid profile for Max Kolysh', function (done) {
+    var person = { name: 'Gordon Wintrob'};
+    var context = {};
+    github.fn(person, context, function (err) {
+      if (err) return done(err);
+      console.log(person);
+      assert(person);
+      person.github.url.should.equal('https://github.com/gwintrob');
+      person.github.username.should.equal('gwintrob');
       done();
     });
   });
