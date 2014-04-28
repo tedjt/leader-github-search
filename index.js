@@ -163,7 +163,7 @@ function wait (person, context) {
 
 function getSearchTerm (person, context) {
   var name = person.name;
-  if (name && name.trim().split(/\s+/).length > 1) {
+  if (name && name.toString().trim().split(/\s+/).length > 1) {
     return name;
   } else {
     return null;
